@@ -11,17 +11,26 @@
         h1 { margin: 0; font-size: 28px; text-transform: uppercase; letter-spacing: 2px; }
         h1 span { color: var(--red); }
         .container { max-width: 600px; width: 90%; margin: 40px auto; flex: 1; }
+        
+        /* PRO Key Section */
+        .pro-section { background: #111; padding: 15px; border-radius: 8px; border: 1px solid #333; margin-bottom: 20px; display: flex; gap: 10px; align-items: center; }
+        .pro-section input { flex: 1; padding: 10px; border-radius: 4px; border: 1px solid #444; background: var(--bg); color: white; outline: none; }
+        .pro-section input:focus { border-color: var(--red); }
+        .pro-section button { background: #f5a623; color: black; border: none; padding: 10px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        .pro-section button:hover { background: #e09612; }
+        #pro-status { font-size: 12px; color: #f5a623; margin-left: 10px; font-weight: bold; display: none; }
+
         .chat-box { background: var(--gray); border-radius: 8px; padding: 20px; height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; border: 1px solid #333; }
         .msg { padding: 12px; border-radius: 6px; max-width: 85%; line-height: 1.4; font-size: 15px; }
         .msg.user { background: #333; align-self: flex-end; color: white; }
         .msg.gary { background: rgba(232,25,44,0.1); border-left: 4px solid var(--red); align-self: flex-start; }
         .controls { display: flex; gap: 10px; margin-top: 20px; }
-        input[type="text"] { flex: 1; padding: 15px; border-radius: 6px; border: 1px solid #333; background: var(--gray); color: white; font-size: 16px; outline: none; }
-        input[type="text"]:focus { border-color: var(--red); }
-        button { background: var(--red); color: white; border: none; padding: 15px 25px; border-radius: 6px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
-        button:hover { background: #b01321; }
+        input[type="text"].chat-input { flex: 1; padding: 15px; border-radius: 6px; border: 1px solid #333; background: var(--gray); color: white; font-size: 16px; outline: none; }
+        input[type="text"].chat-input:focus { border-color: var(--red); }
+        .ask-btn { background: var(--red); color: white; border: none; padding: 15px 25px; border-radius: 6px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
+        .ask-btn:hover { background: #b01321; }
         .footer-note { text-align: center; margin-top: 20px; font-size: 12px; color: #666; }
-        .upgrade-btn { display: none; width: 100%; background: #f5a623; color: black; text-align: center; padding: 15px; border-radius: 6px; font-weight: bold; text-decoration: none; margin-top: 15px; text-transform: uppercase; }
+        .upgrade-btn { display: none; width: 100%; background: #f5a623; color: black; text-align: center; padding: 15px; border-radius: 6px; font-weight: bold; text-decoration: none; margin-top: 15px; text-transform: uppercase; box-sizing: border-box; }
     </style>
 </head>
 <body>
@@ -32,6 +41,13 @@
     </header>
 
     <div class="container">
+        
+        <div class="pro-section">
+            <input type="password" id="proKey" placeholder="Paste Whop PRO Key here...">
+            <button onclick="saveProKey()">Activate</button>
+            <span id="pro-status">⚡ SAVAGE MODE ON</span>
+        </div>
+
         <div class="chat-box" id="chat">
             <div class="msg gary"><strong>GARY:</strong> Right then. I'm Gary. Ask me anything about the 2026 World Cup. I always pick a winner, and I don't sugarcoat anything. Go on.</div>
         </div>
@@ -39,22 +55,45 @@
         <a href="https://whop.com/gary-the-guillotine" target="_blank" class="upgrade-btn" id="upgrade-btn">⚡ Get Gary PRO (Unlimited + Savage Mode)</a>
 
         <div class="controls">
-            <input type="text" id="prompt" placeholder="Who chokes first in the group stages?" onkeypress="if(event.key === 'Enter') askGary()">
-            <button onclick="askGary()" id="ask-btn">Ask</button>
+            <input type="text" id="prompt" class="chat-input" placeholder="Who chokes first in the group stages?" onkeypress="if(event.key === 'Enter') askGary()">
+            <button onclick="askGary()" id="ask-btn" class="ask-btn">Ask</button>
         </div>
         
         <p class="footer-note" id="usage-tracker">Free requests left today: 10</p>
     </div>
 
     <script>
-        // --- IMPORTANT: CHANGE THIS TO YOUR RENDER URL ONCE DEPLOYED ---
         const API_URL = "https://punditbot.onrender.com/api/pundit"; 
         
-        // Generate a random user ID for the browser session
+        // Generate or load unique User ID
         let userId = localStorage.getItem("gary_web_user");
         if (!userId) {
             userId = "web_" + Math.random().toString(36).substr(2, 9);
             localStorage.setItem("gary_web_user", userId);
+        }
+
+        // Load PRO Key dynamically on startup
+        window.onload = () => {
+            const savedKey = localStorage.getItem("gary_pro_key");
+            if (savedKey) {
+                document.getElementById('proKey').value = savedKey;
+                document.getElementById('pro-status').style.display = 'inline';
+                document.getElementById('usage-tracker').innerText = "⚡ Unlimited PRO Access Active";
+            }
+        };
+
+        function saveProKey() {
+            const key = document.getElementById('proKey').value.trim();
+            if (key) {
+                localStorage.setItem("gary_pro_key", key);
+                document.getElementById('pro-status').style.display = 'inline';
+                document.getElementById('usage-tracker').innerText = "⚡ Unlimited PRO Access Active";
+                alert("PRO Key saved! Gary's filters are off.");
+            } else {
+                localStorage.removeItem("gary_pro_key");
+                document.getElementById('pro-status').style.display = 'none';
+                document.getElementById('usage-tracker').innerText = "Switched to Free Tier";
+            }
         }
 
         async function askGary() {
@@ -62,10 +101,11 @@
             const btn = document.getElementById('ask-btn');
             const chat = document.getElementById('chat');
             const text = input.value.trim();
+            const proKey = localStorage.getItem("gary_pro_key") || "";
 
             if (!text) return;
 
-            // Add user message
+            // Update UI with user message
             chat.innerHTML += `<div class="msg user">${text}</div>`;
             input.value = '';
             btn.disabled = true;
@@ -75,14 +115,17 @@
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-Gary-Pro-Key': proKey
+                    },
                     body: JSON.stringify({ prompt: text, user_id: userId })
                 });
 
                 const data = await response.json();
 
                 if (response.status === 429) {
-                    chat.innerHTML += `<div class="msg gary" style="border-color: #f5a623;"><strong>GARY:</strong> You've hit your daily limit, mate. I don't work for free forever. Get PRO.</div>`;
+                    chat.innerHTML += `<div class="msg gary" style="border-color: #f5a623;"><strong>GARY:</strong> You've hit your daily limit, mate. I don't work for free forever. Paste your PRO key above, or buy one below.</div>`;
                     document.getElementById('upgrade-btn').style.display = 'block';
                     document.getElementById('usage-tracker').innerText = "Limit Reached.";
                 } else if (response.ok) {
@@ -94,7 +137,7 @@
                         }
                     }
                 } else {
-                    chat.innerHTML += `<div class="msg gary">Gary's mic cut out. Try again.</div>`;
+                    chat.innerHTML += `<div class="msg gary">Gary's mic cut out. Server might be overloaded.</div>`;
                 }
             } catch (err) {
                 chat.innerHTML += `<div class="msg gary">Connection lost. Check your internet.</div>`;
