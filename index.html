@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gary The Guillotine | 2026 World Cup AI Pundit</title>
+    <style>
+        :root { --bg: #0a0a0a; --red: #e8192c; --text: #f0ede8; --gray: #1c1c1c; }
+        body { background: var(--bg); color: var(--text); font-family: 'Arial', sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        header { width: 100%; background: var(--gray); padding: 20px 0; text-align: center; border-bottom: 2px solid var(--red); }
+        h1 { margin: 0; font-size: 28px; text-transform: uppercase; letter-spacing: 2px; }
+        h1 span { color: var(--red); }
+        .container { max-width: 600px; width: 90%; margin: 40px auto; flex: 1; }
+        .chat-box { background: var(--gray); border-radius: 8px; padding: 20px; height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; border: 1px solid #333; }
+        .msg { padding: 12px; border-radius: 6px; max-width: 85%; line-height: 1.4; font-size: 15px; }
+        .msg.user { background: #333; align-self: flex-end; color: white; }
+        .msg.gary { background: rgba(232,25,44,0.1); border-left: 4px solid var(--red); align-self: flex-start; }
+        .controls { display: flex; gap: 10px; margin-top: 20px; }
+        input[type="text"] { flex: 1; padding: 15px; border-radius: 6px; border: 1px solid #333; background: var(--gray); color: white; font-size: 16px; outline: none; }
+        input[type="text"]:focus { border-color: var(--red); }
+        button { background: var(--red); color: white; border: none; padding: 15px 25px; border-radius: 6px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
+        button:hover { background: #b01321; }
+        .footer-note { text-align: center; margin-top: 20px; font-size: 12px; color: #666; }
+        .upgrade-btn { display: none; width: 100%; background: #f5a623; color: black; text-align: center; padding: 15px; border-radius: 6px; font-weight: bold; text-decoration: none; margin-top: 15px; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Gary <span>The Guillotine</span></h1>
+        <p style="margin: 5px 0 0 0; color: #888; font-size: 14px;">The most brutal AI football pundit on earth.</p>
+    </header>
+
+    <div class="container">
+        <div class="chat-box" id="chat">
+            <div class="msg gary"><strong>GARY:</strong> Right then. I'm Gary. Ask me anything about the 2026 World Cup. I always pick a winner, and I don't sugarcoat anything. Go on.</div>
+        </div>
+
+        <a href="https://whop.com/gary-the-guillotine" target="_blank" class="upgrade-btn" id="upgrade-btn">⚡ Get Gary PRO (Unlimited + Savage Mode)</a>
+
+        <div class="controls">
+            <input type="text" id="prompt" placeholder="Who chokes first in the group stages?" onkeypress="if(event.key === 'Enter') askGary()">
+            <button onclick="askGary()" id="ask-btn">Ask</button>
+        </div>
+        
+        <p class="footer-note" id="usage-tracker">Free requests left today: 10</p>
+    </div>
+
+    <script>
+        // --- IMPORTANT: CHANGE THIS TO YOUR RENDER URL ONCE DEPLOYED ---
+        const API_URL = "https://punditbot.onrender.com"; 
+        
+        // Generate a random user ID for the browser session
+        let userId = localStorage.getItem("gary_web_user");
+        if (!userId) {
+            userId = "web_" + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem("gary_web_user", userId);
+        }
+
+        async function askGary() {
+            const input = document.getElementById('prompt');
+            const btn = document.getElementById('ask-btn');
+            const chat = document.getElementById('chat');
+            const text = input.value.trim();
+
+            if (!text) return;
+
+            // Add user message
+            chat.innerHTML += `<div class="msg user">${text}</div>`;
+            input.value = '';
+            btn.disabled = true;
+            btn.innerText = '...';
+            chat.scrollTop = chat.scrollHeight;
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: text, user_id: userId })
+                });
+
+                const data = await response.json();
+
+                if (response.status === 429) {
+                    chat.innerHTML += `<div class="msg gary" style="border-color: #f5a623;"><strong>GARY:</strong> You've hit your daily limit, mate. I don't work for free forever. Get PRO.</div>`;
+                    document.getElementById('upgrade-btn').style.display = 'block';
+                    document.getElementById('usage-tracker').innerText = "Limit Reached.";
+                } else if (response.ok) {
+                    chat.innerHTML += `<div class="msg gary"><strong>GARY:</strong> ${data.response}</div>`;
+                    if (data.usage) {
+                        document.getElementById('usage-tracker').innerText = `Free requests left today: ${data.usage.remaining}`;
+                        if (data.usage.remaining <= 2) {
+                            document.getElementById('upgrade-btn').style.display = 'block';
+                        }
+                    }
+                } else {
+                    chat.innerHTML += `<div class="msg gary">Gary's mic cut out. Try again.</div>`;
+                }
+            } catch (err) {
+                chat.innerHTML += `<div class="msg gary">Connection lost. Check your internet.</div>`;
+            }
+
+            btn.disabled = false;
+            btn.innerText = 'Ask';
+            chat.scrollTop = chat.scrollHeight;
+        }
+    </script>
+</body>
+</html>
