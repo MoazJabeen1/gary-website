@@ -88,11 +88,11 @@
                 status.innerText = "⚡ SAVAGE MODE ON";
                 status.style.color = "#f5a623";
                 tracker.innerText = "⚡ Unlimited PRO Access Active";
-                upgradeBtn.style.display = 'none';
+                upgradeBtn.style.display = 'none'; // Always hide upgrade button for PROs
             } else {
                 container.classList.remove('active-mode');
                 status.style.display = 'none';
-                upgradeBtn.style.display = 'block';
+                upgradeBtn.style.display = 'none'; // Keep hidden for new free users on load
             }
         }
 
@@ -205,7 +205,8 @@
                     chat.innerHTML += `<div class="msg gary"><strong>GARY:</strong> ${data.response}</div>`;
                     if (data.usage && !proKey) {
                         document.getElementById('usage-tracker').innerText = `Free requests left today: ${data.usage.remaining}`;
-                        if (data.usage.remaining <= 2) {
+                        // UPSELL LOGIC UPDATED: Triggers when they have 3 or fewer requests left
+                        if (data.usage.remaining <= 3) {
                             document.getElementById('upgrade-btn').style.display = 'block';
                         }
                     }
