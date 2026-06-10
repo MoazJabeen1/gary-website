@@ -1,228 +1,414 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gary The Guillotine | 2026 World Cup AI Pundit</title>
-    <style>
-        :root { --bg: #0a0a0a; --red: #e8192c; --text: #f0ede8; --gray: #1c1c1c; }
-        body { background: var(--bg); color: var(--text); font-family: 'Arial', sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        header { width: 100%; background: var(--gray); padding: 20px 0; text-align: center; border-bottom: 2px solid var(--red); }
-        h1 { margin: 0; font-size: 28px; text-transform: uppercase; letter-spacing: 2px; }
-        h1 span { color: var(--red); }
-        .container { max-width: 600px; width: 90%; margin: 40px auto; flex: 1; display: flex; flex-direction: column; }
-        
-        /* PRO Key Section */
-        .pro-section { background: #111; padding: 15px; border-radius: 8px; border: 1px solid #333; margin-bottom: 20px; display: flex; gap: 10px; align-items: center; transition: all 0.3s ease; }
-        .pro-section.active-mode { border-color: #f5a623; background: rgba(245, 166, 35, 0.05); }
-        .pro-section input { flex: 1; padding: 10px; border-radius: 4px; border: 1px solid #444; background: var(--bg); color: white; outline: none; }
-        .pro-section input:focus { border-color: var(--red); }
-        .pro-section button { background: #f5a623; color: black; border: none; padding: 10px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
-        .pro-section button:hover { background: #e09612; }
-        #pro-status { font-size: 12px; color: #f5a623; margin-left: 10px; font-weight: bold; display: none; white-space: nowrap; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gary The Guillotine | 2026 World Cup AI Pundit</title>
+<meta name="description" content="Ask Gary anything about the 2026 FIFA World Cup. Brutal predictions. Zero mercy. Free to try.">
+<style>
+  :root {
+    --bg: #0a0a0a; --red: #e8192c; --gold: #f5a623;
+    --text: #f0ede8; --gray: #1a1a1a; --border: #2a2a2a; --muted: #666;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh; display: flex; flex-direction: column;
+  }
 
-        .chat-box { background: var(--gray); border-radius: 8px; padding: 20px; height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; border: 1px solid #333; }
-        .msg { padding: 12px; border-radius: 6px; max-width: 85%; line-height: 1.4; font-size: 15px; word-wrap: break-word; }
-        .msg.user { background: #333; align-self: flex-end; color: white; }
-        .msg.gary { background: rgba(232,25,44,0.1); border-left: 4px solid var(--red); align-self: flex-start; }
-        .msg.system-loading { background: transparent; color: #888; align-self: flex-start; font-style: italic; border-left: 4px solid #555; }
-        
-        .controls { display: flex; gap: 10px; margin-top: 20px; }
-        input[type="text"].chat-input { flex: 1; padding: 15px; border-radius: 6px; border: 1px solid #333; background: var(--gray); color: white; font-size: 16px; outline: none; }
-        input[type="text"].chat-input:focus { border-color: var(--red); }
-        .ask-btn { background: var(--red); color: white; border: none; padding: 15px 25px; border-radius: 6px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
-        .ask-btn:disabled { background: #555; cursor: not-allowed; }
-        
-        .footer-note { text-align: center; margin-top: 20px; font-size: 12px; color: #666; }
-        .upgrade-btn { display: none; width: 100%; background: #f5a623; color: black; text-align: center; padding: 15px; border-radius: 6px; font-weight: bold; text-decoration: none; margin-top: 15px; text-transform: uppercase; box-sizing: border-box; }
-    </style>
+  /* ── HEADER ── */
+  header {
+    background: var(--gray); border-bottom: 2px solid var(--red);
+    padding: 16px 20px; text-align: center;
+    position: sticky; top: 0; z-index: 10;
+  }
+  header h1 { font-size: 24px; font-weight: 900; text-transform: uppercase; letter-spacing: 3px; }
+  header h1 span { color: var(--red); }
+  header p { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+  /* ── LIVE BANNER ── */
+  .live-banner {
+    background: var(--red); color: white;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; padding: 7px 0; text-align: center;
+  }
+
+  /* ── MAIN ── */
+  .container { max-width: 640px; width: 90%; margin: 0 auto; flex: 1; padding: 24px 0 40px; }
+
+  /* ── PRO KEY ROW ── */
+  .pro-row {
+    display: flex; gap: 8px; align-items: stretch;
+    background: var(--gray); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px; margin-bottom: 16px;
+    transition: border-color 0.3s;
+  }
+  .pro-row.active { border-color: var(--gold); background: rgba(245,166,35,0.05); }
+  .pro-row input {
+    flex: 1; background: #111; border: 1px solid #333;
+    border-radius: 6px; padding: 10px 12px; color: var(--text);
+    font-size: 14px; outline: none; min-width: 0;
+  }
+  .pro-row input:focus { border-color: var(--red); }
+  .btn-activate {
+    background: var(--gold); color: #000; border: none;
+    padding: 10px 14px; border-radius: 6px; font-weight: 700;
+    font-size: 13px; cursor: pointer; white-space: nowrap;
+    text-transform: uppercase; transition: background 0.2s;
+  }
+  .btn-activate:hover { background: #e09612; }
+  .btn-buy {
+    background: var(--red); color: white; border: none;
+    padding: 10px 14px; border-radius: 6px; font-weight: 700;
+    font-size: 13px; cursor: pointer; white-space: nowrap;
+    text-decoration: none; display: flex; align-items: center;
+    transition: background 0.2s;
+  }
+  .btn-buy:hover { background: #c0101f; }
+  .pro-badge {
+    display: none; align-items: center; gap: 6px;
+    color: var(--gold); font-size: 13px; font-weight: 700;
+    white-space: nowrap;
+  }
+  .pro-badge.show { display: flex; }
+
+  /* ── QUICK PROMPTS ── */
+  .quick-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .qbtn {
+    background: transparent; border: 1px solid var(--border); color: #888;
+    padding: 6px 12px; border-radius: 20px; font-size: 12px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .qbtn:hover { border-color: var(--red); color: var(--text); }
+
+  /* ── CHAT ── */
+  .chat-box {
+    background: var(--gray); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px;
+    height: 420px; overflow-y: auto;
+    display: flex; flex-direction: column; gap: 14px;
+    scroll-behavior: smooth;
+  }
+  .chat-box::-webkit-scrollbar { width: 4px; }
+  .chat-box::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+  .msg { max-width: 88%; padding: 12px 14px; border-radius: 8px; font-size: 15px; line-height: 1.5; word-wrap: break-word; }
+  .msg.user { background: #2a2a2a; align-self: flex-end; color: var(--text); }
+  .msg.gary {
+    background: rgba(232,25,44,0.08); border-left: 3px solid var(--red);
+    align-self: flex-start; color: var(--text);
+  }
+  .msg.gary strong { color: var(--red); }
+  .msg.loading { color: #555; font-style: italic; align-self: flex-start; font-size: 13px; }
+
+  /* ── UPGRADE BUTTON (appears when close to limit) ── */
+  .upgrade-strip {
+    display: none; background: var(--gold); color: #000;
+    text-align: center; padding: 12px; border-radius: 8px;
+    font-weight: 700; font-size: 14px; text-decoration: none;
+    margin-top: 10px; transition: background 0.2s;
+  }
+  .upgrade-strip:hover { background: #e09612; }
+  .upgrade-strip.show { display: block; }
+
+  /* ── INPUT ROW ── */
+  .input-row { display: flex; gap: 10px; margin-top: 12px; }
+  .input-row input {
+    flex: 1; background: var(--gray); border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px 16px; color: var(--text);
+    font-size: 16px; outline: none; transition: border-color 0.2s;
+  }
+  .input-row input:focus { border-color: var(--red); }
+  .btn-ask {
+    background: var(--red); color: white; border: none;
+    padding: 14px 22px; border-radius: 8px; font-weight: 700;
+    font-size: 15px; cursor: pointer; transition: background 0.2s;
+    text-transform: uppercase;
+  }
+  .btn-ask:hover { background: #c0101f; }
+  .btn-ask:disabled { background: #444; cursor: not-allowed; }
+
+  /* ── USAGE BAR ── */
+  .usage-row { margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
+  .usage-text { font-size: 12px; color: var(--muted); }
+  .usage-text.warn { color: var(--gold); }
+  .usage-bar { height: 3px; background: #222; border-radius: 2px; margin-top: 6px; overflow: hidden; }
+  .usage-fill { height: 100%; background: var(--red); border-radius: 2px; transition: width 0.4s; }
+
+  /* ── FOOTER ── */
+  footer { text-align: center; padding: 20px; border-top: 1px solid var(--border); }
+  footer p { font-size: 11px; color: var(--muted); }
+
+  @media (max-width: 480px) {
+    .container { width: 95%; }
+    .pro-row { flex-wrap: wrap; }
+    .btn-buy span { display: none; }
+  }
+</style>
 </head>
 <body>
 
-    <header>
-        <h1>Gary <span>The Guillotine</span></h1>
-        <p style="margin: 5px 0 0 0; color: #888; font-size: 14px;">The most brutal AI football pundit on earth.</p>
-    </header>
+<header>
+  <h1>Gary <span>The Guillotine</span></h1>
+  <p>The most brutal AI football pundit on earth · 2026 FIFA World Cup</p>
+</header>
 
-    <div class="container">
-        
-        <div id="proContainer" class="pro-section">
-            <input type="password" id="proKey" placeholder="Paste Whop PRO Key here...">
-            <button onclick="saveProKey()">Activate</button>
-            <span id="pro-status">⚡ SAVAGE MODE ON</span>
-        </div>
+<div class="live-banner">🔴 LIVE · 2026 FIFA World Cup · June 11 – July 19</div>
 
-        <div class="chat-box" id="chat">
-            <div class="msg gary"><strong>GARY:</strong> Right then. I'm Gary. Ask me anything about the 2026 World Cup. I always pick a winner, and I don't sugarcoat anything. Go on.</div>
-        </div>
-        <a href="https://whop.com/gary-the-guillotine/gary-pro-membership-24" target="_blank" class="upgrade-btn" id="upgrade-btn">⚡ Get Gary PRO (Savage Mode + Full Access)</a>
-        
+<div class="container">
 
-        <div class="controls">
-            <input type="text" id="prompt" class="chat-input" placeholder="Who chokes first in the group stages?" onkeypress="if(event.key === 'Enter') askGary()">
-            <button onclick="askGary()" id="ask-btn" class="ask-btn">Ask</button>
-        </div>
-        
-        <p class="footer-note" id="usage-tracker">Free requests left today: 10</p>
-    </div>
+  <!-- PRO KEY ROW -->
+  <div class="pro-row" id="proRow">
+    <input type="password" id="proKey" placeholder="Have a PRO key? Paste it here...">
+    <button class="btn-activate" onclick="activateKey()">Activate</button>
+    <a class="btn-buy" href="https://whop.com/gary-the-guillotine" target="_blank">
+      ⚡ <span>Get PRO</span>
+    </a>
+    <div class="pro-badge" id="proBadge">✅ SAVAGE MODE</div>
+  </div>
 
-    <script>
-        const API_URL = "https://punditbot.onrender.com/api/pundit"; 
-        
-        let userId = localStorage.getItem("gary_web_user");
-        if (!userId) {
-            userId = "web_" + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem("gary_web_user", userId);
+  <!-- QUICK PROMPTS -->
+  <div class="quick-row">
+    <button class="qbtn" onclick="q('Who wins the 2026 World Cup?')">🏆 Who wins?</button>
+    <button class="qbtn" onclick="q('Will England finally win a World Cup?')">🦁 England?</button>
+    <button class="qbtn" onclick="q('Who is the biggest dark horse at 2026?')">🐴 Dark horse?</button>
+    <button class="qbtn" onclick="q('Which team embarrasses themselves most?')">😬 Biggest flop?</button>
+    <button class="qbtn" onclick="q('Rate every group at the 2026 World Cup')">📊 Rate groups</button>
+  </div>
+
+  <!-- CHAT -->
+  <div class="chat-box" id="chat">
+    <div class="msg gary"><strong>GARY:</strong> Right then. I'm Gary "The Guillotine" Grantham. Ask me anything about the 2026 World Cup — predictions, who's going to bottle it, who surprises everyone. I always pick a winner and I never sugarcoat. Go on then.</div>
+  </div>
+
+  <!-- UPGRADE STRIP -->
+  <a class="upgrade-strip" id="upgradeStrip" href="https://whop.com/gary-the-guillotine" target="_blank">
+    ⚡ Running low on free questions — Get Gary PRO for unlimited + SAVAGE mode →
+  </a>
+
+  <!-- INPUT -->
+  <div class="input-row">
+    <input type="text" id="prompt" placeholder="Who chokes first in the group stages?" maxlength="500">
+    <button class="btn-ask" id="askBtn" onclick="askGary()">Ask</button>
+  </div>
+
+  <!-- USAGE -->
+  <div class="usage-row" id="usageSection">
+    <span class="usage-text" id="usageText">10 free questions today</span>
+    <span class="usage-text" id="usageCount" style="color:#444">0/10 used</span>
+  </div>
+  <div class="usage-bar"><div class="usage-fill" id="usageFill" style="width:0%"></div></div>
+
+</div>
+
+<footer>
+  <p>⚠️ Gary is an AI pundit. All predictions are for entertainment only — not betting advice.<br>
+  Built for the 2026 FIFA World Cup · <a href="https://whop.com/gary-the-guillotine" target="_blank" style="color:var(--red);text-decoration:none">Get Gary PRO →</a></p>
+</footer>
+
+<script>
+  // ── CONFIG ─────────────────────────────────────────────────────────
+  const API       = "https://punditbot.onrender.com";
+  const WHOP      = "https://whop.com/gary-the-guillotine";
+  const FREE_MAX  = 10;
+
+  // ── STATE ──────────────────────────────────────────────────────────
+  let userId  = localStorage.getItem("gary_uid") || (() => {
+    const id = "web_" + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem("gary_uid", id);
+    return id;
+  })();
+
+  let usedToday = parseInt(localStorage.getItem("gary_used_" + today()) || "0");
+  let isBusy    = false;
+  let isPro     = !!localStorage.getItem("gary_pro_key");
+
+  function today() { return new Date().toISOString().split("T")[0]; }
+
+  // Clear yesterday's count
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
+  localStorage.removeItem("gary_used_" + yesterday);
+
+  // ── UI HELPERS ─────────────────────────────────────────────────────
+  function updateUsageUI(used) {
+    usedToday = Math.min(used, FREE_MAX);
+    localStorage.setItem("gary_used_" + today(), usedToday);
+    const remaining = FREE_MAX - usedToday;
+    const pct = (usedToday / FREE_MAX) * 100;
+    document.getElementById("usageFill").style.width = pct + "%";
+    document.getElementById("usageCount").textContent = usedToday + "/" + FREE_MAX + " used";
+    const ut = document.getElementById("usageText");
+    if (remaining <= 0) {
+      ut.textContent = "Daily limit reached — upgrade for unlimited";
+      ut.className = "usage-text warn";
+    } else if (remaining <= 3) {
+      ut.textContent = remaining + " free question" + (remaining===1?"":"s") + " left today";
+      ut.className = "usage-text warn";
+      document.getElementById("upgradeStrip").classList.add("show");
+    } else {
+      ut.textContent = remaining + " free questions left today";
+      ut.className = "usage-text";
+    }
+  }
+
+  function setProUI(active) {
+    isPro = active;
+    const row = document.getElementById("proRow");
+    const badge = document.getElementById("proBadge");
+    const usageSec = document.getElementById("usageSection");
+    if (active) {
+      row.classList.add("active");
+      badge.classList.add("show");
+      document.getElementById("usageText").textContent = "⚡ Unlimited PRO Access — SAVAGE MODE ON";
+      document.getElementById("usageText").className = "usage-text";
+      document.getElementById("usageCount").textContent = "";
+      document.getElementById("usageFill").style.width = "0%";
+      document.getElementById("upgradeStrip").classList.remove("show");
+    } else {
+      row.classList.remove("active");
+      badge.classList.remove("show");
+      updateUsageUI(usedToday);
+    }
+  }
+
+  function addMsg(role, html) {
+    const chat = document.getElementById("chat");
+    const div = document.createElement("div");
+    div.className = "msg " + role;
+    div.innerHTML = html;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+    return div;
+  }
+
+  function removeEl(el) { if (el && el.parentNode) el.parentNode.removeChild(el); }
+  function q(text) { document.getElementById("prompt").value = text; document.getElementById("prompt").focus(); }
+
+  // ── INIT ───────────────────────────────────────────────────────────
+  window.addEventListener("DOMContentLoaded", () => {
+    const savedKey = localStorage.getItem("gary_pro_key");
+    if (savedKey) {
+      document.getElementById("proKey").value = savedKey;
+      setProUI(true);
+    } else {
+      updateUsageUI(usedToday);
+    }
+    document.getElementById("prompt").addEventListener("keydown", e => {
+      if (e.key === "Enter") askGary();
+    });
+  });
+
+  // ── KEY ACTIVATION ─────────────────────────────────────────────────
+  async function activateKey() {
+    const key = document.getElementById("proKey").value.trim();
+
+    if (!key) {
+      localStorage.removeItem("gary_pro_key");
+      setProUI(false);
+      return;
+    }
+
+    const btn = document.querySelector(".btn-activate");
+    btn.textContent = "Checking...";
+    btn.disabled = true;
+
+    try {
+      // Use the dedicated /api/verify-key endpoint — no Gemini call, instant response
+      const res = await fetch(API + "/api/verify-key", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Gary-Pro-Key": key }
+      });
+      const data = await res.json();
+
+      if (data.valid === true) {
+        localStorage.setItem("gary_pro_key", key);
+        setProUI(true);
+        addMsg("gary", "<strong>GARY:</strong> PRO key verified. Savage mode is on. No more filters. Ask me anything.");
+      } else {
+        localStorage.removeItem("gary_pro_key");
+        setProUI(false);
+        addMsg("gary", `<strong>GARY:</strong> That key is invalid or inactive. Get a real one → <a href="${WHOP}" target="_blank" style="color:var(--gold)">Gary PRO</a>`);
+      }
+    } catch (err) {
+      addMsg("gary", "<strong>GARY:</strong> Couldn't verify your key — check your connection and try again.");
+    }
+
+    btn.textContent = "Activate";
+    btn.disabled = false;
+  }
+
+  // ── ASK GARY ───────────────────────────────────────────────────────
+  async function askGary() {
+    if (isBusy) return;
+    const input = document.getElementById("prompt");
+    const text  = input.value.trim();
+    if (!text) return;
+
+    const proKey = localStorage.getItem("gary_pro_key") || "";
+
+    // Local limit check (fast — no server call)
+    if (!isPro && usedToday >= FREE_MAX) {
+      addMsg("gary",
+        `<strong>GARY:</strong> You've hit your ${FREE_MAX} free questions for today, mate. ` +
+        `I don't work for free forever. <a href="${WHOP}" target="_blank" style="color:var(--gold)">Upgrade to PRO →</a>`
+      );
+      document.getElementById("upgradeStrip").classList.add("show");
+      return;
+    }
+
+    isBusy = true;
+    const askBtn = document.getElementById("askBtn");
+    askBtn.disabled = true;
+    askBtn.textContent = "...";
+    input.value = "";
+
+    addMsg("user", text);
+    const loader = addMsg("loading", "Gary is sharpening the blade...");
+
+    try {
+      const res = await fetch(API + "/api/pundit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Gary-Pro-Key": proKey
+        },
+        body: JSON.stringify({ prompt: text, user_id: userId })
+      });
+
+      removeEl(loader);
+      const data = await res.json();
+
+      if (res.status === 429) {
+        addMsg("gary",
+          `<strong>GARY:</strong> Daily limit reached. Upgrade to PRO for unlimited → ` +
+          `<a href="${WHOP}" target="_blank" style="color:var(--gold)">Get Gary PRO</a>`
+        );
+        document.getElementById("upgradeStrip").classList.add("show");
+        updateUsageUI(FREE_MAX);
+      } else if (res.ok) {
+        const reply = (data.response || "Gary had a moment. Try again.").replace(/\n/g, "<br>");
+        addMsg("gary", `<strong>GARY:</strong> ${reply}`);
+
+        if (data.usage && !isPro) {
+          const used = FREE_MAX - data.usage.remaining;
+          updateUsageUI(used);
         }
-
-        // Handle structural layout transformations based on tier status
-        function updateProUI(isActive) {
-            const container = document.getElementById('proContainer');
-            const status = document.getElementById('pro-status');
-            const tracker = document.getElementById('usage-tracker');
-            const upgradeBtn = document.getElementById('upgrade-btn');
-
-            if (isActive) {
-                container.classList.add('active-mode');
-                status.style.display = 'inline';
-                status.innerText = "⚡ SAVAGE MODE ON";
-                status.style.color = "#f5a623";
-                tracker.innerText = "⚡ Unlimited PRO Access Active";
-                upgradeBtn.style.display = 'none'; // Always hide upgrade button for PROs
-            } else {
-                container.classList.remove('active-mode');
-                status.style.display = 'none';
-                upgradeBtn.style.display = 'none'; // Keep hidden for new free users on load
-            }
+        if (data.upsell) {
+          document.getElementById("upgradeStrip").classList.add("show");
         }
+      } else {
+        addMsg("gary", "<strong>GARY:</strong> Something went wrong on our end. Try again in a moment.");
+      }
+    } catch (err) {
+      removeEl(loader);
+      addMsg("gary", "<strong>GARY:</strong> Connection dropped. Check your internet and try again.");
+    }
 
-        window.onload = () => {
-            const savedKey = localStorage.getItem("gary_pro_key");
-            if (savedKey && savedKey.trim() !== "") {
-                document.getElementById('proKey').value = savedKey;
-                updateProUI(true);
-            } else {
-                updateProUI(false);
-                document.getElementById('usage-tracker').innerText = "Free requests left today: 10";
-            }
-        };
-
-        // Live multi-device validation logic 
-        async function saveProKey() {
-            const keyField = document.getElementById('proKey');
-            const key = keyField.value.trim();
-            const status = document.getElementById('pro-status');
-
-            if (!key) {
-                localStorage.removeItem("gary_pro_key");
-                updateProUI(false);
-                document.getElementById('usage-tracker').innerText = "Free requests left today: 10";
-                return;
-            }
-
-            status.style.display = 'inline';
-            status.innerText = "Verifying...";
-            status.style.color = "#888";
-
-            try {
-                // Sends a silent check payload to verify authorization against Supabase rows
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'X-Gary-Pro-Key': key
-                    },
-                    body: JSON.stringify({ prompt: "PING_KEY_CHECK", user_id: userId })
-                });
-
-                if (response.status === 429) {
-                    alert("❌ Invalid Key! The Guillotine rejected this pass.");
-                    localStorage.removeItem("gary_pro_key");
-                    updateProUI(false);
-                    document.getElementById('usage-tracker').innerText = "Limit Reached.";
-                } else if (response.ok) {
-                    const data = await response.json();
-                    
-                    // If backend processes data with normal usage values, it falls under free restrictions
-                    if (data.usage) {
-                        alert("❌ Invalid Key! This is not an active Whop PRO license.");
-                        localStorage.removeItem("gary_pro_key");
-                        updateProUI(false);
-                    } else {
-                        // Success block: Confirms key bypasses core tracking rules
-                        localStorage.setItem("gary_pro_key", key);
-                        updateProUI(true);
-                        alert("✅ PRO Key Activated! Gary's filters are permanently off.");
-                    }
-                } else {
-                    alert("Server error during verification. Try again.");
-                    updateProUI(false);
-                }
-            } catch (err) {
-                alert("Connection failed. Couldn't verify key.");
-                updateProUI(false);
-            }
-        }
-
-        async function askGary() {
-            const input = document.getElementById('prompt');
-            const btn = document.getElementById('ask-btn');
-            const chat = document.getElementById('chat');
-            const text = input.value.trim();
-            const proKey = localStorage.getItem("gary_pro_key") || "";
-
-            if (!text) return;
-
-            chat.innerHTML += `<div class="msg user">${text}</div>`;
-            input.value = '';
-            btn.disabled = true;
-            btn.innerText = 'Thinking...';
-            
-            const loadingId = "loading-" + Date.now();
-            chat.innerHTML += `<div class="msg system-loading" id="${loadingId}">Gary is sharpening the blade...</div>`;
-            chat.scrollTop = chat.scrollHeight;
-
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'X-Gary-Pro-Key': proKey
-                    },
-                    body: JSON.stringify({ prompt: text, user_id: userId })
-                });
-
-                const data = await response.json();
-                
-                const loadingRow = document.getElementById(loadingId);
-                if (loadingRow) loadingRow.remove();
-
-                if (response.status === 429) {
-                    chat.innerHTML += `<div class="msg gary" style="border-color: #f5a623;"><strong>GARY:</strong> You've hit your daily limit, mate. I don't work for free forever. Paste your PRO key above, or buy one below.</div>`;
-                    document.getElementById('upgrade-btn').style.display = 'block';
-                    document.getElementById('usage-tracker').innerText = "Limit Reached.";
-                } else if (response.ok) {
-                    chat.innerHTML += `<div class="msg gary"><strong>GARY:</strong> ${data.response}</div>`;
-                    if (data.usage && !proKey) {
-                        document.getElementById('usage-tracker').innerText = `Free requests left today: ${data.usage.remaining}`;
-                        // UPSELL LOGIC UPDATED: Triggers when they have 3 or fewer requests left
-                        if (data.usage.remaining <= 3) {
-                            document.getElementById('upgrade-btn').style.display = 'block';
-                        }
-                    }
-                } else {
-                    chat.innerHTML += `<div class="msg gary">Gary's mic cut out. Server might be overloaded.</div>`;
-                }
-            } catch (err) {
-                const loadingRow = document.getElementById(loadingId);
-                if (loadingRow) loadingRow.remove();
-                chat.innerHTML += `<div class="msg gary">Connection lost. Check your internet.</div>`;
-            }
-
-            btn.disabled = false;
-            btn.innerText = 'Ask';
-            chat.scrollTop = chat.scrollHeight;
-        }
-    </script>
+    isBusy = false;
+    askBtn.disabled = false;
+    askBtn.textContent = "Ask";
+  }
+</script>
 </body>
 </html>
